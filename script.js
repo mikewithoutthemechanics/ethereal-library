@@ -113,6 +113,8 @@ function showFallbackPage(idx) {
   const book = CONFIG.books[currentBookIdx];
   if (!book || !book.pages[idx]) return;
 
+  const leftEl = document.getElementById('page-left');
+  const rightEl = document.getElementById('page-right');
   const leftContent = document.getElementById('page-left-content');
   const rightContent = document.getElementById('page-right-content');
   const counter = document.getElementById('page-counter');
@@ -129,6 +131,34 @@ function showFallbackPage(idx) {
   // Nav button states
   document.getElementById('prev-page').disabled = idx === 0;
   document.getElementById('next-page').disabled = idx + 2 >= book.pages.length;
+
+  // Update reading progress
+  updateProgress();
+
+  // Page transition animation
+  animatePageTurn(leftEl, rightEl);
+}
+
+function animatePageTurn(leftEl, rightEl) {
+  // Quick page-flip effect
+  leftEl.classList.remove('page-transition-in');
+  rightEl.classList.remove('page-transition-in');
+  leftEl.classList.add('page-transition-out');
+  rightEl.classList.add('page-transition-out');
+  setTimeout(() => {
+    leftEl.classList.remove('page-transition-out');
+    rightEl.classList.remove('page-transition-out');
+    leftEl.classList.add('page-transition-in');
+    rightEl.classList.add('page-transition-in');
+  }, 10);
+}
+
+function updateProgress() {
+  const book = CONFIG.books[currentBookIdx];
+  if (!book) return;
+  const pct = ((currentPageIdx + 1) / book.pages.length) * 100;
+  const fill = document.getElementById('progress-fill');
+  if (fill) fill.style.width = pct + '%';
 }
 
 function buildPageHTML(page) {
@@ -174,11 +204,17 @@ function darken(hex) {
 function closeBook() {
   const overlay = document.getElementById('book-overlay');
   const cover = document.getElementById('book-cover');
-  cover.classList.remove('opened');
-  document.getElementById('book-pages').classList.add('hidden');
-  overlay.classList.add('hidden');
-  overlay.classList.remove('show');
-  isBookOpen = false;
+  
+  // Closing animation
+  cover.classList.add('closing');
+  setTimeout(() => {
+    cover.classList.remove('opened');
+    cover.classList.remove('closing');
+    document.getElementById('book-pages').classList.add('hidden');
+    overlay.classList.add('hidden');
+    overlay.classList.remove('show');
+    isBookOpen = false;
+  }, 600);
 }
 
 function nextPage() {
@@ -389,6 +425,17 @@ function initThree() {
     window.addEventListener('deviceorientation', (e) => {
       if (!e.gamma || isBookOpen) return;
       orbitAngle = e.gamma * 0.01;
+    });
+  }
+
+  // Parallax moonlight follow (desktop mouse)
+  const moonlight = document.getElementById('moonlight');
+  if (moonlight && !IS_MOBILE) {
+    document.addEventListener('mousemove', (e) => {
+      if (isBookOpen) return;
+      const x = (e.clientX / window.innerWidth - 0.5) * 40;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      moonlight.style.transform = `translateX(calc(-50% + ${x}px)) perspective(800px) rotateX(${20 + y}deg)`;
     });
   }
 
@@ -1048,4 +1095,12 @@ window.toggleAudio = () => {
   if (!audioGain) return;
   const v = audioGain.gain.value;
   audioGain.gain.linearRampToValueAtTime(v > 0 ? 0 : 0.25, audioCtx.currentTime + 0.5);
+};
+
+// Update progress on 3D book open too
+const _origPickUp = pickUpBook;
+pickUpBook = async function(bookObj) {
+  if (isBookOpen) return;
+  await _origPickUp(bookObj);
+  updateProgress();
 };

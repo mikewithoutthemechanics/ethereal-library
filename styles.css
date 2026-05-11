@@ -458,6 +458,84 @@ body.three-active #canvas-container { pointer-events: auto; }
   border-radius: 0;
 }
 
+/* Drop cap for first paragraph of letters */
+.page-content > p:first-of-type::first-letter {
+  font-size: 3.2rem;
+  font-family: var(--font-script);
+  float: left;
+  line-height: 0.75;
+  margin-right: 0.25em;
+  margin-top: 0.15em;
+  color: var(--accent-rose);
+}
+
+/* Reading progress bar */
+.reading-progress {
+  position: absolute;
+  bottom: 44px; left: 0; right: 0;
+  height: 3px;
+  background: rgba(0,0,0,0.08);
+  z-index: 2;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--candle-glow), var(--accent-rose));
+  transition: width 0.5s ease;
+  border-radius: 2px;
+}
+
+/* Page transition */
+.page-transition-out {
+  animation: pageTurnOut 0.5s ease-in forwards;
+}
+
+.page-transition-in {
+  animation: pageTurnIn 0.5s ease-out forwards;
+}
+
+@keyframes pageTurnOut {
+  0% { opacity: 1; transform: translateX(0) scale(1); }
+  50% { opacity: 0.5; transform: translateX(-15px) scale(0.97); }
+  100% { opacity: 0; transform: translateX(-30px) scale(0.94); }
+}
+
+@keyframes pageTurnIn {
+  0% { opacity: 0; transform: translateX(30px) scale(0.94); }
+  50% { opacity: 0.5; transform: translateX(15px) scale(0.97); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Moonlight beam from window */
+.moonlight {
+  position: fixed;
+  top: 0; left: 50%;
+  width: 300px;
+  height: 600px;
+  transform: translateX(-50%) perspective(800px) rotateX(20deg);
+  background: linear-gradient(
+    ellipse at 50% 0%,
+    rgba(120, 160, 200, 0.08) 0%,
+    rgba(100, 140, 180, 0.04) 30%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+  transition: transform 0.3s ease;
+}
+
+/* Book closing animation */
+.book-cover.closing {
+  animation: bookClose 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+
+@keyframes bookClose {
+  0% { opacity: 1; transform: translateZ(0) rotateY(-160deg); }
+  50% { opacity: 0.5; transform: translateZ(-200px) rotateY(-180deg) scale(0.8); }
+  100% { opacity: 0; transform: translateZ(-500px) rotateY(-200deg) scale(0.3); }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════════════ */

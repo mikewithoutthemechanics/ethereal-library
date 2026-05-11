@@ -20,6 +20,9 @@
   <!-- Candlelight overlay -->
   <canvas id="flicker-overlay"></canvas>
 
+  <!-- Moonlight beam (parallax) -->
+  <div class="moonlight" id="moonlight"></div>
+
   <!-- ===================== FALLBACK (no WebGL / mobile) ===================== -->
   <div id="fallback-library" class="fallback-library hidden">
     <h1 class="fallback-title">📚 Our Library</h1>
@@ -40,14 +43,14 @@
     </div>
     <div id="book-pages" class="book-pages hidden">
       <div class="page-spread">
-        <div class="page left-page" id="page-left">
+        <div class="page-transition-out page-transition-in page left-page" id="page-left">
           <div class="page-content" id="page-left-content"></div>
         </div>
         <div class="page-center">
           <div class="page-flip left-flip"></div>
           <div class="page-flip right-flip"></div>
         </div>
-        <div class="page right-page" id="page-right">
+        <div class="page-transition-out page-transition-in page right-page" id="page-right">
           <div class="page-content" id="page-right-content"></div>
         </div>
       </div>
@@ -55,6 +58,9 @@
         <button id="prev-page" class="btn-nav">← Previous</button>
         <span id="page-counter" class="page-counter"></span>
         <button id="next-page" class="btn-nav">Next →</button>
+      </div>
+      <div class="reading-progress">
+        <div class="progress-fill" id="progress-fill"></div>
       </div>
     </div>
   </div>
