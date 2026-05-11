@@ -1075,34 +1075,94 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Audio enable button (mobile)
-document.getElementById('enable-audio').addEventListener('click', async (e) => {
-  e.stopPropagation();
-  audioEnabled = true;
-  try {
-    if (!audioCtx || audioCtx.state === 'suspended') await playAmbientPiano();
-    else if (audioGain) audioGain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 1);
-  } catch {}
-  e.target.classList.add('hidden');
-});
+
+// Audio enable button
+function initAudioButton() {
+  const btn = document.getElementById('enable-audio');
+  if (!btn) return;
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    audioEnabled = true;
+    try {
+      if (!audioCtx || audioCtx.state === 'suspended') await playAmbientPiano();
+      else if (audioGain) audioGain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 1);
+    } catch {}
+    btn.classList.add('hidden');
+  });
+  if (!IS_MOBILE) btn.classList.add('hidden');
+}
 
 // Spotify playlist button
 function initSpotifyButton() {
   const btn = document.getElementById('spotify-btn');
   if (!btn) return;
-  if (CONFIG.spotifyPlaylist) {
+  if (CONFIG.spotifyPlaylist && CONFIG.spotifyPlaylist !== 'https://open.spotify.com/playlist/YOUR_PLAYLIST_HERE') {
     btn.href = CONFIG.spotifyPlaylist;
   } else {
     btn.classList.add('hidden');
   }
 }
 
-// Auto-enable audio on desktop, show button on mobile
-document.addEventListener('DOMContentLoaded', () => {
-  initSpotifyButton();
-  if (!IS_MOBILE) {
-    setTimeout(() => playAmbientPiano(), 3000);
-    document.getElementById('enable-audio').classList.add('hidden');
+// ═══════════════════════════════════════════════════════════════════════
+// Bootstrap
+// ═══════════════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadConfig();
+
+  // Lightweight scroll init (no heavy Lenis dependency on Three.js pages)
+  try { initBasicScroll(); } catch (e) { console.warn('Scroll:', e.message); }
+
+  // Candlelight overlay
+  try { initFlickerOverlay(); } catch (e) { console.warn('Flicker:', e.message); }
+
+  // Book overlay
+  try { initBookOverlay(); } catch (e) { console.warn('Book overlay:', e.message); }
+
+  // UI buttons
+  try { initAudioButton(); } catch (e) { console.warn('Audio:', e.message); }
+  try { initSpotifyButton(); } catch (e) { console.warn('Spotify:', e.message); }
+
+  // Loading screen
+  let loadingScreen = document.getElementById('loading-screen');
+  if (!loadingScreen) {
+    loadingScreen = document.createElement('div');
+    loadingScreen.id = 'loading-screen';
+    loadingScreen.innerHTML = '<h1>Our Library</h1><p>loading...</p>';
+    loadingScreen.style.cssText = 'position:fixed;inset:0;background:#0a0810;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1s,visibility 1s;color:#ff8f00;';
+    document.body.prepend(loadingScreen);
+  }
+
+  // Three.js
+  if (USE_THREE) {
+    try {
+      await sleep(400);
+      initThree();
+      console.log('Three.js ready');
+    } catch (e) {
+      console.warn('Three.js failed:', e.message);
+      USE_THREE = false;
+    }
+  }
+
+  if (!USE_THREE) {
+    const fb = document.getElementById('fallback-library');
+    if (fb) fb.classList.remove('hidden');
+    try { initFallbackLibrary(); } catch (e) { console.warn('Fallback:', e.message); }
+  } else {
+    document.body.classList.add('three-active');
+  }
+
+  // Fade out loading after paint
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (loadingScreen) loadingScreen.classList.add('hidden');
+    });
+  });
+
+  // Ambient audio
+  if (!IS_MOBILE && audioEnabled) {
+    try { await playAmbientPiano(); } catch {}
   }
 });
 
@@ -1114,7 +1174,6 @@ window.toggleAudio = () => {
   audioGain.gain.linearRampToValueAtTime(v > 0 ? 0 : 0.25, audioCtx.currentTime + 0.5);
 };
 
-// Update progress on 3D book open too
 const _origPickUp = pickUpBook;
 pickUpBook = async function(bookObj) {
   if (isBookOpen) return;
