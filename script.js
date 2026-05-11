@@ -903,10 +903,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (!USE_THREE) {
     console.log('CSS fallback library');
-    document.body.classList.add('three-active'); // Show fallback, hide canvas
+    const fb = document.getElementById('fallback-library');
+    if (fb) fb.classList.remove('hidden');
     initFallbackLibrary();
-    loadingScreen.classList.add('hidden');
+  } else {
+    document.body.classList.add('three-active');
   }
+  loadingScreen.classList.add('hidden');
 
   // Start ambient audio
   if (audioEnabled) {
