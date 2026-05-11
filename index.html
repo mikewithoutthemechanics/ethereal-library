@@ -7,6 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -55,6 +58,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Audio enable button (mobile) -->
+  <button id="enable-audio" class="audio-btn">🔊 Enable Ambient Sound</button>
 
   <!-- Ambient audio (optional) -->
   <audio id="ambient-audio" loop preload="auto" style="display:none">

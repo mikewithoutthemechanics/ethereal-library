@@ -105,6 +105,7 @@ function openFallbackBook(idx) {
     cover.classList.add('opened');
     showFallbackPage(0);
     document.getElementById('book-pages').classList.remove('hidden');
+    initSwipeGestures();
   }, 400);
 }
 
@@ -372,6 +373,24 @@ function initThree() {
   window.addEventListener('resize', onResize);
   window.addEventListener('click', onMouseClick);
   window.addEventListener('mousemove', onMouseMove);
+
+  // Gyroscope support (mobile)
+  if (IS_MOBILE) {
+    let gyroReady = false;
+    document.addEventListener('click', function gyroRequest() {
+      if (gyroReady) { document.removeEventListener('click', gyroRequest); return; }
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(r => {
+          gyroReady = r === 'granted';
+        }).catch(() => {});
+      } else { gyroReady = true; }
+      document.removeEventListener('click', gyroRequest);
+    }, { once: true });
+    window.addEventListener('deviceorientation', (e) => {
+      if (!e.gamma || isBookOpen) return;
+      orbitAngle = e.gamma * 0.01;
+    });
+  }
 
   document.body.classList.add('three-active');
   document.getElementById('loading-screen').classList.add('hidden');
@@ -722,22 +741,88 @@ function onMouseMove(e) {
   }
 }
 
-function onMouseClick(e) {
-  if (IS_MOBILE || isBookOpen) return;
-
+function tryPickBook(clientX, clientY) {
+  if (isBookOpen || !scene) return;
+  mouse.x = (clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
   const books = [];
   scene.traverse(obj => {
     if (obj.userData && obj.userData.isBook) books.push(obj);
   });
-
   const hits = raycaster.intersectObjects(books, true);
   if (hits.length > 0) {
     const book = hits[0].object;
-    if (book.userData.isBook) {
-      pickUpBook(book);
-    }
+    if (book.userData.isBook) pickUpBook(book);
   }
+}
+
+function onMouseClick(e) {
+  if (IS_MOBILE) return;
+  tryPickBook(e.clientX, e.clientY);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Touch Support (Mobile)
+// ═══════════════════════════════════════════════════════════════════════════
+
+let touchStartX, touchStartY, touchStartTime, isSwiping = false;
+
+window.addEventListener('touchstart', onTouchStart, { passive: false });
+window.addEventListener('touchmove', onTouchMove, { passive: false });
+window.addEventListener('touchend', onTouchEnd, { passive: false });
+
+function onTouchStart(e) {
+  if (isBookOpen) return;
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+  touchStartTime = Date.now();
+  isSwiping = false;
+}
+
+function onTouchMove(e) {
+  if (isBookOpen) return;
+  const touch = e.touches[0];
+  if (Math.abs(touch.clientX - touchStartX) > 10 || Math.abs(touch.clientY - touchStartY) > 10) {
+    isSwiping = true;
+  }
+}
+
+function onTouchEnd(e) {
+  if (isBookOpen) return;
+  const touch = e.changedTouches[0];
+  const dx = touch.clientX - touchStartX;
+  const dt = Date.now() - touchStartTime;
+
+  // Tap: pick a book
+  if (!isSwiping && dt < 300) {
+    tryPickBook(touch.clientX, touch.clientY);
+  }
+  // Swipe: orbit camera
+  else if (isSwiping && Math.abs(dx) > 60) {
+    orbitAngle += dx * 0.005;
+  }
+  isSwiping = false;
+}
+
+function initSwipeGestures() {
+  const pages = document.getElementById('book-pages');
+  if (!pages) return;
+  let sx, sy;
+  pages.addEventListener('touchstart', (e) => {
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+  }, { passive: true });
+  pages.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) nextPage();
+      else prevPage();
+      try { navigator.vibrate(30); } catch {}
+    }
+  }, { passive: true });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -790,6 +875,7 @@ async function pickUpBook(bookObj) {
     cover.classList.add('opened');
     showFallbackPage(0);
     document.getElementById('book-pages').classList.remove('hidden');
+    initSwipeGestures();
   }, 500);
 
   // Hide 3D book
@@ -813,6 +899,7 @@ function darken(hex) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 let orbitAngle = 0;
+let lastFrameTime = 0;
 
 function updateCamera() {
   if (isBookOpen) return;
@@ -830,6 +917,12 @@ function updateCamera() {
 
 function animate() {
   requestAnimationFrame(animate);
+
+  if (IS_MOBILE) {
+    const now = performance.now();
+    if (now - lastFrameTime < 33) return;
+    lastFrameTime = now;
+  }
 
   const delta = clock.getDelta();
   const t = clock.getElapsedTime();
@@ -915,6 +1008,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (audioEnabled) {
     // Delay to not be annoying
     setTimeout(() => playAmbientPiano(), 3000);
+  }
+});
+
+// Audio enable button (mobile)
+document.getElementById('enable-audio').addEventListener('click', async (e) => {
+  e.stopPropagation();
+  audioEnabled = true;
+  try {
+    if (!audioCtx || audioCtx.state === 'suspended') await playAmbientPiano();
+    else if (audioGain) audioGain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 1);
+  } catch {}
+  e.target.classList.add('hidden');
+});
+
+// Auto-enable audio on desktop, show button on mobile
+document.addEventListener('DOMContentLoaded', () => {
+  if (!IS_MOBILE) {
+    setTimeout(() => playAmbientPiano(), 3000);
+    document.getElementById('enable-audio').classList.add('hidden');
   }
 });
 

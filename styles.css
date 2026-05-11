@@ -469,6 +469,41 @@ body.three-active #canvas-container { pointer-events: auto; }
   .btn-close { top: 1rem; right: 1rem; width: 38px; height: 38px; font-size: 1.1rem; }
 }
 
+/* Audio enable button */
+.audio-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+  background: rgba(60, 30, 15, 0.8);
+  border: 1px solid rgba(255, 143, 0, 0.4);
+  color: var(--accent-gold);
+  padding: 0.6rem 1rem;
+  border-radius: 20px;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.audio-btn:hover {
+  background: rgba(255, 143, 0, 0.15);
+  border-color: var(--accent-gold);
+}
+
+.audio-btn.hidden { display: none; }
+
+/* Prevent body scroll when book overlay is open */
+body:has(.book-overlay.show) {
+  overflow: hidden;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .btn-nav { padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); }
+  .audio-btn { padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
+}
+
 /* Hide fallback when Three.js takes over */
 body.three-active #fallback-library { display: none !important; }
 
