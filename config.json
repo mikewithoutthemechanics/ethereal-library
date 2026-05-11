@@ -65,5 +65,6 @@
       ]
     }
   ],
-  "countdownDate": "2026-06-14T00:00:00"
+  "countdownDate": "2026-06-14T00:00:00",
+  "spotifyPlaylist": "https://open.spotify.com/playlist/YOUR_PLAYLIST_HERE"
 }

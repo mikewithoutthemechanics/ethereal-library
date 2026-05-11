@@ -1022,8 +1022,20 @@ document.getElementById('enable-audio').addEventListener('click', async (e) => {
   e.target.classList.add('hidden');
 });
 
+// Spotify playlist button
+function initSpotifyButton() {
+  const btn = document.getElementById('spotify-btn');
+  if (!btn) return;
+  if (CONFIG.spotifyPlaylist) {
+    btn.href = CONFIG.spotifyPlaylist;
+  } else {
+    btn.classList.add('hidden');
+  }
+}
+
 // Auto-enable audio on desktop, show button on mobile
 document.addEventListener('DOMContentLoaded', () => {
+  initSpotifyButton();
   if (!IS_MOBILE) {
     setTimeout(() => playAmbientPiano(), 3000);
     document.getElementById('enable-audio').classList.add('hidden');
