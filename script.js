@@ -1028,6 +1028,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   initBookOverlay();
 
   const loadingScreen = document.getElementById('loading-screen');
+  if (!loadingScreen) {
+    // Create fallback loading screen if missing
+    const fallback = document.createElement('div');
+    fallback.id = 'loading-screen';
+    fallback.innerHTML = '<h1>📚 Our Library</h1><p>loading...</p>';
+    fallback.style.cssText = 'position:fixed;inset:0;background:#0a0810;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1s;color:#ff8f00;';
+    document.body.prepend(fallback);
+  } else {
+    loadingScreen.classList.remove('hidden');
+  }
 
   if (USE_THREE) {
     try {
