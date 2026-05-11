@@ -23,7 +23,6 @@ let ambientSource, audioCtx, audioGain, audioEnabled = true;
 let isBookOpen = false;
 let currentPageIdx = 0;
 let currentBookIdx = 0;
-let scrollTimeout;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Config
@@ -318,32 +317,7 @@ function initFlickerOverlay() {
 // Smooth Scroll
 // ═══════════════════════════════════════════════════════════════════════════
 
-function initScroll() {
-  try {
-    const lenis = new Lenis({
-      duration: IS_MOBILE ? 0.8 : 1.2,
-      easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smooth: true, smoothTouch: false, touchMultiplier: 2
-    });
-    function raf(t) { lenis.raf(t); requestAnimationFrame(raf); }
-    requestAnimationFrame(raf);
-    document.body.classList.add('smooth-scroll');
-  } catch (e) {
-    console.warn('Lenis failed, using basic scroll:', e.message);
-    initBasicScroll();
-  }
 
-  gsap.registerPlugin(ScrollTrigger);
-
-  // Reveal any visible sections on scroll
-  gsap.utils.toArray('.reveal').forEach(el => {
-    gsap.to(el, {
-      opacity: 1, y: 0,
-      duration: 1.2, ease: 'power2.out',
-      scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none reverse' }
-    });
-  });
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Three.js — Candlelit Library Room
@@ -366,6 +340,7 @@ function initThree() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.9;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.setClearColor(0x0a0810, 1);
   container.appendChild(renderer.domElement);
 
   // Post-processing (wrapped in try/catch for resilience)
@@ -1003,103 +978,65 @@ function animate() {
     renderer.render(scene, camera);
   }
 }
+// ═══════════════════════════════════════════════════════════════════════
+// Spotify playlist button
+// ═══════════════════════════════════════════════════════════════════════
 
-function onResize() {
-  if (!camera || !renderer) return;
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+function initSpotifyButton() {
+  const btn = document.getElementById('spotify-btn');
+  if (!btn) return;
+  if (CONFIG.spotifyPlaylist && CONFIG.spotifyPlaylist !== 'https://open.spotify.com/playlist/YOUR_PLAYLIST_HERE') {
+    btn.href = CONFIG.spotifyPlaylist;
+  } else {
+    btn.classList.add('hidden');
+  }
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// Audio toggle
+// ═══════════════════════════════════════════════════════════════════════
+
+function initAudioButton() {
+  const btn = document.getElementById('enable-audio');
+  if (!btn) return;
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    audioEnabled = true;
+    try {
+      if (!audioCtx || audioCtx.state === 'suspended') await playAmbientPiano();
+      else if (audioGain) audioGain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 1);
+    } catch {}
+    btn.classList.add('hidden');
+  });
+  if (!IS_MOBILE) btn.classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Bootstrap — single consolidated init
 // ═══════════════════════════════════════════════════════════════════════════
-// Bootstrap
-function initAudioButton() {
-  const btn = document.getElementById('enable-audio');
-  if (!btn) return;
-  btn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    audioEnabled = true;
-    try {
-      if (!audioCtx || audioCtx.state === 'suspended') await playAmbientPiano();
-      else if (audioGain) audioGain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 1);
-    } catch {}
-    btn.classList.add('hidden');
-  });
-  if (!IS_MOBILE) btn.classList.add('hidden');
-}
-
-// Spotify playlist button
-function initSpotifyButton() {
-  const btn = document.getElementById('spotify-btn');
-  if (!btn) return;
-  if (CONFIG.spotifyPlaylist && CONFIG.spotifyPlaylist !== 'https://open.spotify.com/playlist/YOUR_PLAYLIST_HERE') {
-    btn.href = CONFIG.spotifyPlaylist;
-  } else {
-    btn.classList.add('hidden');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-
-function initAudioButton() {
-  const btn = document.getElementById('enable-audio');
-  if (!btn) return;
-  btn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    audioEnabled = true;
-    try {
-      if (!audioCtx || audioCtx.state === 'suspended') await playAmbientPiano();
-      else if (audioGain) audioGain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 1);
-    } catch {}
-    btn.classList.add('hidden');
-  });
-  if (!IS_MOBILE) btn.classList.add('hidden');
-}
-
-// Spotify playlist button
-
-function initSpotifyButton() {
-  const btn = document.getElementById('spotify-btn');
-  if (!btn) return;
-  if (CONFIG.spotifyPlaylist && CONFIG.spotifyPlaylist !== 'https://open.spotify.com/playlist/YOUR_PLAYLIST_HERE') {
-    btn.href = CONFIG.spotifyPlaylist;
-  } else {
-    btn.classList.add('hidden');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// Bootstrap
-// ═══════════════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadConfig();
+  try { await loadConfig(); } catch (e) {
+    console.warn('Config load failed:', e.message);
+    CONFIG = { herName: 'Candice', yourName: 'Michael', books: [], countdownDate: new Date(Date.now() + 30*86400000).toISOString() };
+  }
 
-  // Lightweight scroll init (no heavy Lenis dependency on Three.js pages)
   try { initBasicScroll(); } catch (e) { console.warn('Scroll:', e.message); }
-
-  // Candlelight overlay
   try { initFlickerOverlay(); } catch (e) { console.warn('Flicker:', e.message); }
-
-  // Book overlay
   try { initBookOverlay(); } catch (e) { console.warn('Book overlay:', e.message); }
-
-  // UI buttons
-  try { initAudioButton(); } catch (e) { console.warn('Audio:', e.message); }
+  try { initAudioButton(); } catch (e) { console.warn('Audio btn:', e.message); }
   try { initSpotifyButton(); } catch (e) { console.warn('Spotify:', e.message); }
 
   // Loading screen
   let loadingScreen = document.getElementById('loading-screen');
   if (!loadingScreen) {
-    loadingScreen = document.createElement('div');
-    loadingScreen.id = 'loading-screen';
-    loadingScreen.innerHTML = '<h1>Our Library</h1><p>loading...</p>';
-    loadingScreen.style.cssText = 'position:fixed;inset:0;background:#0a0810;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1s,visibility 1s;color:#ff8f00;';
-    document.body.prepend(loadingScreen);
+    const fb = document.createElement('div');
+    fb.id = 'loading-screen';
+    fb.innerHTML = '<h1>Our Library</h1><p>loading...</p>';
+    fb.style.cssText = 'position:fixed;inset:0;background:#0a0810;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1s,visibility 1s;color:#ff8f00;';
+    document.body.prepend(fb);
   }
 
-  // Three.js
   if (USE_THREE) {
     try {
       await sleep(400);
@@ -1115,16 +1052,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fb = document.getElementById('fallback-library');
     if (fb) fb.classList.remove('hidden');
     try { initFallbackLibrary(); } catch (e) { console.warn('Fallback:', e.message); }
+  } else {
+    document.body.classList.add('three-active');
   }
 
-  // Hide loading screen after paint
+  // Hide loading after paint
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       if (loadingScreen) loadingScreen.classList.add('hidden');
     });
   });
 
-  // Ambient audio
+  // Ambient audio (desktop auto, mobile uses toggle button)
   if (!IS_MOBILE && audioEnabled) {
     try { await playAmbientPiano(); } catch {}
   }
@@ -1145,3 +1084,13 @@ pickUpBook = async function(bookObj) {
   updateProgress();
 };
 
+// Global error handler — log but don't crash
+window.addEventListener('error', (e) => {
+  console.error('Global error:', e.message);
+  if (e.message && e.message.includes('THREE') && USE_THREE) {
+    USE_THREE = false;
+    const fb = document.getElementById('fallback-library');
+    if (fb) fb.classList.remove('hidden');
+    try { initFallbackLibrary(); } catch {}
+  }
+});
