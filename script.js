@@ -447,7 +447,6 @@ function initThree() {
   }
 
   document.body.classList.add('three-active');
-  document.getElementById('loading-screen').classList.add('hidden');
 
   animate();
 }
@@ -1015,68 +1014,6 @@ function onResize() {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Bootstrap
-// ═══════════════════════════════════════════════════════════════════════════
-
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadConfig();
-
-  // Init scroll first (works everywhere)
-  try {
-    initScroll();
-  } catch (e) {
-    console.warn('Scroll failed, using fallback:', e.message);
-    initBasicScroll();
-  }
-
-  // Init candle flicker overlay
-  initFlickerOverlay();
-
-  // Book overlay handlers
-  initBookOverlay();
-
-  const loadingScreen = document.getElementById('loading-screen');
-  if (!loadingScreen) {
-    // Create fallback loading screen if missing
-    const fallback = document.createElement('div');
-    fallback.id = 'loading-screen';
-    fallback.innerHTML = '<h1>📚 Our Library</h1><p>loading...</p>';
-    fallback.style.cssText = 'position:fixed;inset:0;background:#0a0810;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1s;color:#ff8f00;';
-    document.body.prepend(fallback);
-  } else {
-    loadingScreen.classList.remove('hidden');
-  }
-
-  if (USE_THREE) {
-    try {
-      // Small delay so loading screen is visible
-      await sleep(600);
-      initThree();
-      console.log('Three.js library loaded');
-    } catch (e) {
-      console.warn('Three.js failed:', e.message);
-      USE_THREE = false;
-    }
-  }
-
-  if (!USE_THREE) {
-    console.log('CSS fallback library');
-    const fb = document.getElementById('fallback-library');
-    if (fb) fb.classList.remove('hidden');
-    initFallbackLibrary();
-  } else {
-    document.body.classList.add('three-active');
-  }
-  loadingScreen.classList.add('hidden');
-
-  // Start ambient audio
-  if (audioEnabled) {
-    // Delay to not be annoying
-    setTimeout(() => playAmbientPiano(), 3000);
-  }
-});
-
-
-// Audio enable button
 function initAudioButton() {
   const btn = document.getElementById('enable-audio');
   if (!btn) return;
@@ -1093,6 +1030,35 @@ function initAudioButton() {
 }
 
 // Spotify playlist button
+function initSpotifyButton() {
+  const btn = document.getElementById('spotify-btn');
+  if (!btn) return;
+  if (CONFIG.spotifyPlaylist && CONFIG.spotifyPlaylist !== 'https://open.spotify.com/playlist/YOUR_PLAYLIST_HERE') {
+    btn.href = CONFIG.spotifyPlaylist;
+  } else {
+    btn.classList.add('hidden');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+
+function initAudioButton() {
+  const btn = document.getElementById('enable-audio');
+  if (!btn) return;
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    audioEnabled = true;
+    try {
+      if (!audioCtx || audioCtx.state === 'suspended') await playAmbientPiano();
+      else if (audioGain) audioGain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 1);
+    } catch {}
+    btn.classList.add('hidden');
+  });
+  if (!IS_MOBILE) btn.classList.add('hidden');
+}
+
+// Spotify playlist button
+
 function initSpotifyButton() {
   const btn = document.getElementById('spotify-btn');
   if (!btn) return;
@@ -1149,11 +1115,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fb = document.getElementById('fallback-library');
     if (fb) fb.classList.remove('hidden');
     try { initFallbackLibrary(); } catch (e) { console.warn('Fallback:', e.message); }
-  } else {
-    document.body.classList.add('three-active');
   }
 
-  // Fade out loading after paint
+  // Hide loading screen after paint
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       if (loadingScreen) loadingScreen.classList.add('hidden');
@@ -1180,3 +1144,4 @@ pickUpBook = async function(bookObj) {
   await _origPickUp(bookObj);
   updateProgress();
 };
+
