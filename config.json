@@ -1,0 +1,52 @@
+{
+  "herName": "Candice",
+  "yourName": "Michael",
+  "tagline": "A library of our love, candlelit and yours to explore.",
+  "books": [
+    {
+      "title": "Our Story",
+      "spineColor": "#8B4513",
+      "pages": [
+        { "type": "letter", "text": "Candice, from the moment you walked into my life, everything changed. This book holds our moments — the ones I never want to forget.", "align": "center" },
+        { "type": "photo", "file": "photo1.jpg", "caption": "The beginning of everything" },
+        { "type": "photo", "file": "photo2.jpg", "caption": "That smile I still dream about" },
+        { "type": "note", "from": "Michael", "text": "You make ordinary days feel like magic.", "align": "left" },
+        { "type": "note", "from": "Candice", "text": "You are my favorite chapter.", "align": "right" }
+      ]
+    },
+    {
+      "title": "Our Adventures",
+      "spineColor": "#D2691E",
+      "pages": [
+        { "type": "letter", "text": "Remember when we... well, every time. Here are some of my favorite moments with you.", "align": "center" },
+        { "type": "photo", "file": "photo3.jpg", "caption": "That day we went out" },
+        { "type": "note", "from": "Michael", "text": "I'd relive every second with you.", "align": "left" },
+        { "type": "photo", "file": "photo4.jpg", "caption": "Just us two" },
+        { "type": "note", "from": "Candice", "text": "You're my person. Always.", "align": "right" }
+      ]
+    },
+    {
+      "title": "Letters to You",
+      "spineColor": "#B8860B",
+      "pages": [
+        { "type": "letter", "text": "I write these things I can never say out loud. But I want you to know every word.", "align": "center" },
+        { "type": "letter", "text": "Dear Candice,\n\nYou don't know this, but I watch you when you think no one's looking. The way you tilt your head when you're thinking. The way you laugh — really laugh — with your whole body. That's my favorite sound in the entire world.\n\nI don't need grand adventures. I need quiet mornings with you. I need your hand in mine. I need you.\n\nForever yours,\nMichael", "align": "left" },
+        { "type": "note", "from": "Michael", "text": "Some words are better written than spoken.", "align": "left" },
+        { "type": "note", "from": "Candice", "text": "Then speak them again. I want to hear them every time.", "align": "right" },
+        { "type": "photo", "file": "photo5.jpg", "caption": "My favorite picture of us" }
+      ]
+    },
+    {
+      "title": "The Promise",
+      "spineColor": "#CD853F",
+      "pages": [
+        { "type": "letter", "text": "This is where we write our next chapter together. What do you want our story to look like?", "align": "center" },
+        { "type": "note", "from": "Michael", "text": "I promise to choose you every single day.", "align": "left" },
+        { "type": "note", "from": "Candice", "text": "I promise to never let you forget it.", "align": "right" },
+        { "type": "photo", "file": "photo1.jpg", "caption": "And so it begins" },
+        { "type": "letter", "text": "End of Book 4. But not the end of us. That story is still being written, one day at a time, together.", "align": "center" }
+      ]
+    }
+  ],
+  "countdownDate": "2026-06-14T00:00:00"
+}

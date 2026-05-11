@@ -1,0 +1,478 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ATHEREAL LIBRARY — Candlelit Interactive Books for Candice
+   Warm, intimate, cinematic. Pick up a book, read our story.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* === Variables === */
+:root {
+  --bg-wall: #1a1420;
+  --bg-wall-light: #231a2e;
+  --bg-floor: #2a1f14;
+  --wood-dark: #3e2723;
+  --wood-medium: #5d4037;
+  --wood-light: #8d6e63;
+  --candle-glow: #ff8f00;
+  --candle-glow-soft: rgba(255, 143, 0, 0.3);
+  --page-cream: #fdf5e6;
+  --ink-dark: #2c1810;
+  --ink-faded: #6b4226;
+  --accent-rose: #e84393;
+  --accent-gold: #fdcb6e;
+  --glass-color: rgba(60, 30, 15, 0.7);
+  --glass-blur: 18px;
+  --radius: 16px;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-script: 'Dancing Script', cursive;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: var(--font-serif);
+  color: var(--page-cream);
+}
+
+.hidden { display: none !important; }
+
+/* === Three.js Canvas === */
+#canvas-container {
+  position: fixed; inset: 0;
+  z-index: 0;
+}
+
+/* === Candlelight Overlay (flicker effect) === */
+#flicker-overlay {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: screen;
+  opacity: 0.12;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOADING SCREEN
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#loading-screen {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, #1a1420 0%, #0a0810 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  transition: opacity 1.2s ease, visibility 1.2s;
+}
+
+#loading-screen.hidden {
+  opacity: 0; visibility: hidden;
+}
+
+#loading-screen h1 {
+  font-family: var(--font-script);
+  font-size: 2.4rem;
+  color: var(--candle-glow);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+#loading-screen p {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: var(--ink-faded);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 12px rgba(255,143,0,0.4)); }
+  50% { filter: brightness(1.3) drop-shadow(0 0 24px rgba(255,143,0,0.7)); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CANDLELIT LIBRARY ROOM (Three.js background)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.three-active #canvas-container { pointer-events: auto; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FALLBACK LIBRARY (mobile / no WebGL)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.fallback-library {
+  position: fixed; inset: 0;
+  z-index: 10;
+  background: radial-gradient(ellipse at 50% 30%, #2a1a10 0%, #1a1420 60%, #0a0810 100%);
+  padding: 3rem 2rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fallback-title {
+  font-family: var(--font-script);
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  color: var(--candle-glow);
+  text-align: center;
+  text-shadow: 0 0 30px rgba(255, 143, 0, 0.5), 0 4px 12px rgba(0,0,0,0.6);
+  margin-bottom: 0.5rem;
+}
+
+.fallback-sub {
+  text-align: center;
+  color: var(--ink-faded);
+  font-size: 1.1rem;
+  font-style: italic;
+  margin-bottom: 3rem;
+  letter-spacing: 0.1em;
+}
+
+.fallback-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.fallback-book {
+  background: linear-gradient(180deg, var(--wood-medium), var(--wood-dark));
+  border-radius: 4px 4px 8px 8px;
+  padding: 1.2rem 0.8rem;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: perspective(600px) rotateX(5deg);
+  position: relative;
+  overflow: hidden;
+}
+
+.fallback-book::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--candle-glow), transparent);
+  opacity: 0.5;
+}
+
+.fallback-book:hover {
+  transform: perspective(600px) rotateX(0deg) translateY(-8px) scale(1.05);
+  box-shadow: 0 16px 40px rgba(255, 143, 0, 0.2), 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.fallback-book-color {
+  height: 8px;
+  border-radius: 4px 4px 0 0;
+  margin-bottom: 0.8rem;
+}
+
+.fallback-book-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--page-cream);
+  margin-bottom: 0.3rem;
+}
+
+.fallback-book-pages {
+  font-size: 0.75rem;
+  color: var(--ink-faded);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOOK OVERLAY (opens when book is picked up)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.book-overlay {
+  position: fixed; inset: 0;
+  z-index: 1000;
+  background: radial-gradient(ellipse at 50% 50%, #2a1a10 0%, #1a1420 50%, #0a0810 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  transition: opacity 0.8s ease;
+}
+
+.book-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Close button */
+.btn-close {
+  position: absolute;
+  top: 1.5rem; right: 1.5rem;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(253, 203, 110, 0.3);
+  background: rgba(26, 20, 32, 0.8);
+  color: var(--accent-gold);
+  font-size: 1.3rem;
+  cursor: pointer;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-close:hover {
+  background: rgba(253, 203, 110, 0.15);
+  border-color: var(--accent-gold);
+  transform: scale(1.1);
+}
+
+/* Book cover */
+.book-cover {
+  perspective: 1200px;
+  width: min(500px, 90vw);
+  height: min(650px, 80vh);
+  position: relative;
+  cursor: pointer;
+}
+
+.cover-front {
+  width: 100%; height: 100%;
+  background: linear-gradient(145deg, var(--wood-light), var(--wood-dark));
+  border-radius: 6px 12px 12px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset -3px 0 6px rgba(0,0,0,0.3);
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  backface-visibility: hidden;
+  transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1),
+              opacity 0.6s ease;
+  border-left: 4px solid var(--wood-dark);
+}
+
+.cover-front::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(253, 203, 110, 0.15);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.book-cover.opened .cover-front {
+  transform: rotateY(-160deg);
+  opacity: 0.3;
+}
+
+.cover-front h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  color: var(--accent-gold);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.08em;
+}
+
+.cover-front p {
+  font-family: var(--font-script);
+  font-size: 1.1rem;
+  color: var(--ink-faded);
+  margin-top: 0.5rem;
+}
+
+.tap-hint {
+  position: absolute;
+  bottom: 1.5rem;
+  font-size: 0.8rem !important;
+  color: var(--candle-glow) !important;
+  animation: pulse 2s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.cover-spine {
+  position: absolute;
+  left: -8px; top: 0; bottom: 0;
+  width: 8px;
+  background: var(--wood-dark);
+  border-radius: 6px 0 0 6px;
+  box-shadow: -3px 0 6px rgba(0,0,0,0.3);
+}
+
+/* Book pages */
+.book-pages {
+  position: absolute;
+  inset: 0;
+}
+
+.book-pages.hidden { display: none; }
+
+.page-spread {
+  display: flex;
+  height: 100%;
+  gap: 0;
+}
+
+.page {
+  flex: 1;
+  height: 100%;
+  background: var(--page-cream);
+  border-radius: 0 4px 4px 0;
+  padding: 2rem 2.2rem;
+  overflow-y: auto;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.page::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 12px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.05), transparent);
+  border-radius: 0 4px 4px 0;
+}
+
+.page-left { border-radius: 0 4px 4px 0; }
+.page-right { border-radius: 4px 0 0 4px; }
+.page-right::before { display: none; }
+
+.page-content {
+  color: var(--ink-dark);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  font-family: var(--font-serif);
+  white-space: pre-wrap;
+}
+
+.page-content img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  margin: 0.5rem 0;
+  object-fit: cover;
+  max-height: 280px;
+}
+
+.page-caption {
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-faded);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.page-heading {
+  font-family: var(--font-script);
+  font-size: 1.6rem;
+  color: var(--accent-rose);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.03em;
+}
+
+.page-salutation {
+  font-style: italic;
+  color: var(--ink-faded);
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.page-signature {
+  margin-top: 2rem;
+  text-align: right;
+  font-family: var(--font-script);
+  font-size: 1.2rem;
+  color: var(--accent-rose);
+}
+
+.page-note-from {
+  font-style: italic;
+  color: var(--ink-faded);
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Page navigation */
+.page-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  padding: 0.5rem;
+}
+
+.btn-nav {
+  background: transparent;
+  border: 1px solid rgba(253, 203, 110, 0.3);
+  color: var(--accent-gold);
+  padding: 0.6rem 1.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-nav:hover {
+  background: rgba(253, 203, 110, 0.1);
+  border-color: var(--accent-gold);
+}
+
+.btn-nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.page-counter {
+  font-family: var(--font-script);
+  font-size: 1.1rem;
+  color: var(--ink-faded);
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Page flip animation */
+.page-flip {
+  width: 24px;
+  height: 100%;
+  background: linear-gradient(90deg, var(--page-cream), rgba(253, 203, 110, 0.1));
+  flex-shrink: 0;
+  border-radius: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .book-cover { width: min(360px, 92vw); height: min(520px, 70vh); }
+  .page { padding: 1.4rem 1.4rem; }
+  .page-content { font-size: 0.95rem; }
+  .btn-close { top: 1rem; right: 1rem; width: 38px; height: 38px; font-size: 1.1rem; }
+}
+
+/* Hide fallback when Three.js takes over */
+body.three-active #fallback-library { display: none !important; }
+
+/* Cursor styles */
+body.three-active #canvas-container { cursor: grab; }
+body.three-active #canvas-container:active { cursor: grabbing; }
+body.three-active .book-overlay { cursor: default; }
