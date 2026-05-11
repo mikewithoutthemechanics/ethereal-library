@@ -24,7 +24,8 @@
         { "type": "note", "from": "Michael", "text": "I'd relive every second with you.", "align": "left" },
         { "type": "photo", "file": "photo5.jpg", "caption": "Just us two" },
         { "type": "note", "from": "Candice", "text": "You're my person. Always.", "align": "right" },
-        { "type": "photo", "file": "photo6.jpg", "caption": "Sunset walks" }
+        { "type": "photo", "file": "photo6.jpg", "caption": "Sunset walks" },
+        { "type": "photo", "file": "photo11.jpg", "caption": "Our little world" }
       ]
     },
     {
@@ -36,7 +37,8 @@
         { "type": "note", "from": "Michael", "text": "Some words are better written than spoken.", "align": "left" },
         { "type": "note", "from": "Candice", "text": "Then speak them again. I want to hear them every time.", "align": "right" },
         { "type": "photo", "file": "photo7.jpg", "caption": "Candid you" },
-        { "type": "photo", "file": "photo8.jpg", "caption": "My favorite picture of us" }
+        { "type": "photo", "file": "photo8.jpg", "caption": "My favorite picture of us" },
+        { "type": "photo", "file": "photo12.jpg", "caption": "That look" }
       ]
     },
     {
@@ -48,6 +50,8 @@
         { "type": "note", "from": "Candice", "text": "I promise to never let you forget it.", "align": "right" },
         { "type": "photo", "file": "photo9.jpg", "caption": "Together forever" },
         { "type": "photo", "file": "photo10.jpg", "caption": "And so it begins" },
+        { "type": "photo", "file": "photo13.jpg", "caption": "All of it" },
+        { "type": "photo", "file": "photo14.jpg", "caption": "No filter needed" },
         { "type": "letter", "text": "End of Book 4. But not the end of us. That story is still being written, one day at a time, together.", "align": "center" }
       ]
     }
