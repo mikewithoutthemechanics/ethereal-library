@@ -368,14 +368,21 @@ function initThree() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   container.appendChild(renderer.domElement);
 
-  // Post-processing
+  // Post-processing (wrapped in try/catch for resilience)
   if (!IS_MOBILE) {
-    composer = new THREE.EffectComposer(renderer);
-    composer.addPass(new THREE.RenderPass(scene, camera));
-    bloomPass = new THREE.UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight), 0.6, 0.4, 0.85
-    );
-    composer.addPass(bloomPass);
+    try {
+      composer = new THREE.EffectComposer(renderer);
+      composer.addPass(new THREE.RenderPass(scene, camera));
+      bloomPass = new THREE.UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight), 0.6, 0.4, 0.85
+      );
+      composer.addPass(bloomPass);
+      console.log('Post-processing initialized');
+    } catch (e) {
+      console.warn('Post-processing failed, rendering without bloom:', e.message);
+      composer = null;
+      bloomPass = null;
+    }
   }
 
   clock = new THREE.Clock();
