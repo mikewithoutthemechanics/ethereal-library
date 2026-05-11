@@ -54,6 +54,15 @@
         { "type": "photo", "file": "photo14.jpg", "caption": "No filter needed" },
         { "type": "letter", "text": "End of Book 4. But not the end of us. That story is still being written, one day at a time, together.", "align": "center" }
       ]
+    },
+    {
+      "title": "Poems that make me think of you",
+      "spineColor": "#8E24AA",
+      "pages": [
+        { "type": "letter", "text": "Affection between friends,\nand we've been to so many of our funerals\nand found our way back.\n\nIn uncharted waters\nwe scratch and claw\ntrying to love the sadness\nout of each other.\n\n(I think it's all gone now my love?)\n\nLate night conversations about everything\nand tender kissing reminds us\nhow we are a secret\nin our own little world.\n\nI watch you soothe your children\nand it finds me in awe of you\nand your maternal instincts,\n\nThe tenderness is all inbetween\nand all around us.\n\nThis time we fight for love.", "align": "center" },
+        { "type": "letter", "text": "How can I convince my heart?\n\nHow do I tell myself it's going to be alright,\nthat there will still be parts of me\nin tact after you,\n\nThat I won't be left a ghost\nwondering, waiting\nand wishing I was still with you?\n\nWho am I to think that it's not already happened\nand that we're in the inevitable state of borrowed time\nuntil forever rears its head?\n\nI sit on your balcony\nand let the wind wash over my desire to love you\nyet it persists —\nyou will always persist.\n\nI am lost in thought\n(oh my love, to get lost with you)\n\nI ask what type of man you consider me to be\n(I am yours, I am yours)\n\nand mostly I question\nif my name is anything more than a metaphor\nfor almost.", "align": "center" },
+        { "type": "letter", "text": "I've loved you —\n(and I shouldn't be ashamed of it)\nlonger than I can remember\n\nwith a fondness that feels\nlike your body pressed against mine\n\nwith a tension so palpable\nthat it's felt across oceans\n\nand there's no question\nwhether or not you're the sun.", "align": "center" }
+      ]
     }
   ],
   "countdownDate": "2026-06-14T00:00:00"
