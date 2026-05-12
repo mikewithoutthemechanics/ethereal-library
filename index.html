@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Our Library — for Candice 💖</title>
+  <title>Ethereal Library — Candice & Michael</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,35 +14,194 @@
 </head>
 <body>
 
-  <!-- Loading Screen -->
+  <!-- ===================== LOADING SCREEN ===================== -->
   <div id="loading-screen">
-    <h1>📚 Our Library</h1>
-    <p>loading...</p>
+    <div class="loading-content">
+      <div class="loading-books">
+        <div class="loading-book"></div>
+        <div class="loading-book"></div>
+        <div class="loading-book"></div>
+      </div>
+      <h1>Ethereal Library</h1>
+      <p class="loading-tagline">A candlelit world of stories</p>
+      <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+    </div>
   </div>
 
-  <!-- 3D Scene -->
-  <div id="canvas-container"></div>
+  <!-- ===================== LOGIN SCREEN (OAuth) ===================== -->
+  <div id="login-screen" class="hidden">
+    <div class="login-overlay"></div>
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-icon">📚</div>
+        <h1>Ethereal Library</h1>
+        <p>Sign in to access your personal bookshelf</p>
+      </div>
+      <div class="login-form">
+        <button id="btn-login-google" class="btn-oauth btn-google">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Sign in with Google
+        </button>
+        <div class="login-divider"><span>or</span></div>
+        <div class="login-email-form">
+          <input type="email" id="login-email" placeholder="Enter your email" class="login-input" />
+          <input type="password" id="login-password" placeholder="Password" class="login-input" />
+          <button id="btn-login-email" class="btn-oauth btn-email">Sign In</button>
+          <button id="btn-signup-email" class="btn-link">Don't have an account? Sign up</button>
+        </div>
+        <div id="login-error" class="login-error hidden"></div>
+      </div>
+      <div class="login-footer">
+        <button id="btn-guest" class="btn-guest">Continue as Guest</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <div id="dashboard" class="hidden">
+    <header class="dash-header">
+      <div class="dash-brand">
+        <span class="dash-logo">📚</span>
+        <h1>Ethereal Library</h1>
+      </div>
+      <nav class="dash-nav">
+        <button id="btn-enter-library" class="dash-btn primary">Enter 3D Library</button>
+        <button id="btn-add-book" class="dash-btn">+ New Book</button>
+        <div class="dash-user">
+          <span id="dash-user-name"></span>
+          <button id="btn-logout" class="dash-btn small">Logout</button>
+        </div>
+      </nav>
+    </header>
+    <main class="dash-content">
+      <!-- Candice's Shelf -->
+      <section class="shelf-section" id="candice-shelf-section">
+        <div class="shelf-header">
+          <h2><span class="shelf-icon">🕯️</span> Candice's Bookshelf</h2>
+          <p class="shelf-desc">Books created by Candice</p>
+          <button class="btn-add-to-shelf" data-owner="Candice">+ Add Book</button>
+        </div>
+        <div class="shelf-books" id="candice-books"></div>
+        <div class="shelf-decoration">
+          <div class="shelf-wood"></div>
+          <div class="shelf-shadow"></div>
+        </div>
+      </section>
+
+      <!-- Michael's Shelf -->
+      <section class="shelf-section" id="michael-shelf-section">
+        <div class="shelf-header">
+          <h2><span class="shelf-icon">📖</span> Michael's Bookshelf</h2>
+          <p class="shelf-desc">Books created by Michael</p>
+          <button class="btn-add-to-shelf" data-owner="Michael">+ Add Book</button>
+        </div>
+        <div class="shelf-books" id="michael-books"></div>
+        <div class="shelf-decoration">
+          <div class="shelf-wood"></div>
+          <div class="shelf-shadow"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===================== ADD BOOK MODAL ===================== -->
+  <div id="add-book-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close-add">&times;</button>
+      <h2>Create New Book</h2>
+      <form id="add-book-form">
+        <div class="form-group">
+          <label for="book-new-title">Book Title</label>
+          <input type="text" id="book-new-title" required placeholder="e.g., Our Summer Adventures" />
+        </div>
+        <div class="form-group">
+          <label for="book-owner-select">Add to Bookshelf</label>
+          <select id="book-owner-select">
+            <option value="Candice">Candice's Shelf</option>
+            <option value="Michael">Michael's Shelf</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="book-spine-color">Spine Color</label>
+          <input type="color" id="book-spine-color" value="#8B4513" />
+        </div>
+        <div class="form-group">
+          <label>Pages</label>
+          <div id="pages-editor">
+            <div class="page-entry" data-page-idx="0">
+              <select class="page-type-select">
+                <option value="letter">Letter/Text</option>
+                <option value="photo">Photo</option>
+                <option value="note">Note</option>
+              </select>
+              <textarea class="page-text" placeholder="Write your text here..."></textarea>
+              <input type="file" class="page-photo-input hidden" accept="image/*" />
+              <div class="page-photo-preview hidden"></div>
+              <input type="text" class="page-from hidden" placeholder="From (name)" />
+              <select class="page-align">
+                <option value="center">Center</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+              <button type="button" class="btn-remove-page" title="Remove page">&times;</button>
+            </div>
+          </div>
+          <button type="button" id="btn-add-page" class="btn-add-page">+ Add Page</button>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">Create Book</button>
+          <button type="button" id="btn-cancel-book" class="btn-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== 3D SCENE ===================== -->
+  <div id="canvas-container" class="hidden"></div>
+
+  <!-- Particle dust overlay -->
+  <canvas id="dust-overlay" class="hidden"></canvas>
 
   <!-- Candlelight overlay -->
-  <canvas id="flicker-overlay"></canvas>
+  <canvas id="flicker-overlay" class="hidden"></canvas>
 
   <!-- Moonlight beam (parallax) -->
-  <div class="moonlight" id="moonlight"></div>
+  <div class="moonlight hidden" id="moonlight"></div>
+
+  <!-- 3D UI Controls -->
+  <div id="scene-controls" class="hidden">
+    <button id="btn-back-dashboard" class="scene-btn">← Dashboard</button>
+    <button id="btn-toggle-audio" class="scene-btn">🎵 Sound</button>
+    <div class="shelf-labels">
+      <div class="shelf-label left-label">Candice's Shelf</div>
+      <div class="shelf-label right-label">Michael's Shelf</div>
+    </div>
+  </div>
 
   <!-- ===================== FALLBACK (no WebGL / mobile) ===================== -->
   <div id="fallback-library" class="fallback-library hidden">
-    <h1 class="fallback-title">📚 Our Library</h1>
+    <h1 class="fallback-title">📚 Ethereal Library</h1>
     <p class="fallback-sub">A candlelit collection of our love</p>
-    <div class="fallback-grid" id="fallbackBookGrid"></div>
+    <div class="fallback-shelves">
+      <div class="fallback-shelf-section">
+        <h3>🕯️ Candice's Shelf</h3>
+        <div class="fallback-grid" id="fallbackCandiceGrid"></div>
+      </div>
+      <div class="fallback-shelf-section">
+        <h3>📖 Michael's Shelf</h3>
+        <div class="fallback-grid" id="fallbackMichaelGrid"></div>
+      </div>
+    </div>
   </div>
 
-  <!-- ===================== BOOK OVERLAY (opens when book picked up) ===================== -->
+  <!-- ===================== BOOK OVERLAY ===================== -->
   <div id="book-overlay" class="book-overlay hidden">
-    <button id="close-book" class="btn-close" aria-label="Close book">✕</button>
+    <button id="close-book" class="btn-close" aria-label="Close book">&times;</button>
     <div id="book-cover" class="book-cover">
       <div class="cover-front">
         <h2 id="book-title-cover"></h2>
-        <p id="book-author">for Candice</p>
+        <p id="book-author"></p>
         <p class="tap-hint">Tap to open</p>
       </div>
       <div class="cover-spine"></div>
@@ -61,9 +220,9 @@
         </div>
       </div>
       <div class="page-nav">
-        <button id="prev-page" class="btn-nav">← Previous</button>
+        <button id="prev-page" class="btn-nav">&larr; Previous</button>
         <span id="page-counter" class="page-counter"></span>
-        <button id="next-page" class="btn-nav">Next →</button>
+        <button id="next-page" class="btn-nav">Next &rarr;</button>
       </div>
       <div class="reading-progress">
         <div class="progress-fill" id="progress-fill"></div>
@@ -71,21 +230,12 @@
     </div>
   </div>
 
-  <!-- Audio enable button (mobile) -->
-  <button id="enable-audio" class="audio-btn">🎵 Enable Ambient Sound</button>
-
-  <!-- Spotify playlist button -->
-  <a id="spotify-btn" class="spotify-btn" href="#" target="_blank" rel="noopener" aria-label="Open Spotify playlist">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm5.5 17.3c-.2.3-.6.4-1 .2-2.7-1.6-6.2-2.1-10.4-1.4-.4.1-.8-.3-.7-.7.1-.4.4-.7.7-.7 3.5-.7 6.5-.2 8.9 1.4.3.2.4.7.2 1.1zm1.5-3.3c-.3.4-.8.5-1.2.3-3.1-1.9-7.7-2.4-11.2-1.3-.5.1-1-.1-1.1-.6-.1-.5.1-1 .6-1.1 4-.9 9.1-.3 12.8 1.5.4.2.6.7.4 1.2zm.1-3.4C15.5 8.5 9.4 8.2 5.3 9.4c-.6.2-1.1-.2-1.3-.7-.2-.6.2-1.1.7-1.3C10.3 6.1 17 6.5 21.4 8.4c.5.2.8.7.7 1.2-.2.5-.7.8-1.2.6z"/></svg>
-    <span>Playlist</span>
-  </a>
-
   <!-- Ambient audio (optional) -->
   <audio id="ambient-audio" loop preload="auto" style="display:none">
     <source src="assets/ambient.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- Scripts (local fallback for post-processing) -->
+  <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="assets/libs/CopyShader.js"></script>
   <script src="assets/libs/Pass.js"></script>
@@ -94,6 +244,8 @@
   <script src="assets/libs/RenderPass.js"></script>
   <script src="assets/libs/UnrealBloomPass.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="auth.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
