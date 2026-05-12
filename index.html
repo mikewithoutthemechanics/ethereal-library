@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Ethereal Library — Candice & Michael</title>
+  <title>Connection — Candice & Michael</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
@@ -22,8 +22,8 @@
         <div class="loading-book"></div>
         <div class="loading-book"></div>
       </div>
-      <h1>Ethereal Library</h1>
-      <p class="loading-tagline">A Moroccan sanctuary of shared stories</p>
+      <h1>Connection</h1>
+      <p class="loading-tagline">A sanctuary for two souls, candlelit and connected</p>
       <div class="loading-bar"><div class="loading-bar-fill"></div></div>
     </div>
   </div>
@@ -34,7 +34,7 @@
     <div class="login-card">
       <div class="login-header">
         <div class="login-icon">🏮</div>
-        <h1>Ethereal Library</h1>
+        <h1>Connection</h1>
         <p>Sign in to your shared sanctuary</p>
       </div>
       <div class="login-form">
@@ -62,7 +62,7 @@
     <header class="dash-header">
       <div class="dash-brand">
         <span class="dash-logo">🏮</span>
-        <h1>Ethereal Library</h1>
+        <h1>Connection</h1>
       </div>
       <nav class="dash-nav">
         <button id="btn-enter-library" class="dash-btn primary">Enter 3D Library</button>
@@ -142,6 +142,151 @@
           </div>
           <button type="submit" class="btn-submit">Add Memory</button>
         </form>
+      </section>
+
+      <!-- Mood / Theme Selector -->
+      <section class="mood-section" id="mood-section">
+        <h3><span class="shelf-icon">🎨</span> Mood & Ambiance</h3>
+        <p class="shelf-desc">Set the atmosphere for your sanctuary</p>
+        <div class="mood-grid">
+          <button class="mood-btn active" data-mood="warm" title="Warm Candlelight">
+            <span class="mood-icon">🕯️</span>
+            <span class="mood-name">Warm</span>
+          </button>
+          <button class="mood-btn" data-mood="cool" title="Cool Moonlight">
+            <span class="mood-icon">🌙</span>
+            <span class="mood-name">Moonlit</span>
+          </button>
+          <button class="mood-btn" data-mood="twilight" title="Twilight Glow">
+            <span class="mood-icon">🌅</span>
+            <span class="mood-name">Twilight</span>
+          </button>
+          <button class="mood-btn" data-mood="dawn" title="Dawn Rose">
+            <span class="mood-icon">🌸</span>
+            <span class="mood-name">Dawn</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Ambient Sound Selector -->
+      <section class="ambient-section" id="ambient-section">
+        <h3><span class="shelf-icon">🎵</span> Ambient Sounds</h3>
+        <p class="shelf-desc">Choose your background atmosphere</p>
+        <div class="ambient-grid">
+          <button class="ambient-btn active" data-sound="silence" title="Silence">
+            <span class="ambient-icon">🔇</span>
+            <span class="ambient-name">Silence</span>
+          </button>
+          <button class="ambient-btn" data-sound="rain" title="Gentle Rain">
+            <span class="ambient-icon">🌧️</span>
+            <span class="ambient-name">Rain</span>
+          </button>
+          <button class="ambient-btn" data-sound="fireplace" title="Crackling Fire">
+            <span class="ambient-icon">🔥</span>
+            <span class="ambient-name">Fireplace</span>
+          </button>
+          <button class="ambient-btn" data-sound="ocean" title="Ocean Waves">
+            <span class="ambient-icon">🌊</span>
+            <span class="ambient-name">Ocean</span>
+          </button>
+          <button class="ambient-btn" data-sound="forest" title="Forest Birds">
+            <span class="ambient-icon">🌿</span>
+            <span class="ambient-name">Forest</span>
+          </button>
+        </div>
+        <div class="ambient-volume">
+          <label>Volume</label>
+          <input type="range" id="ambient-volume" min="0" max="100" value="40" />
+        </div>
+      </section>
+
+      <!-- Couple's Journal -->
+      <section class="journal-section" id="journal-section">
+        <div class="journal-header">
+          <h2><span class="shelf-icon">📝</span> Couple's Journal</h2>
+          <p class="shelf-desc">Daily prompts to deepen your connection</p>
+        </div>
+        <div class="journal-prompt" id="journal-prompt">
+          <div class="prompt-card">
+            <span class="prompt-label">Today's Prompt</span>
+            <p class="prompt-text" id="prompt-text"></p>
+            <button id="btn-refresh-prompt" class="btn-refresh-prompt">New Prompt</button>
+          </div>
+        </div>
+        <div id="journal-entries" class="journal-entries"></div>
+        <form id="journal-form" class="journal-form">
+          <textarea id="journal-text" placeholder="Write your reflection here..." required></textarea>
+          <div class="form-row">
+            <input type="text" id="journal-by" placeholder="Your name" />
+            <button type="submit" class="btn-submit">Save Entry</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Relationship Timeline -->
+      <section class="timeline-section" id="timeline-section">
+        <div class="timeline-header">
+          <h2><span class="shelf-icon">💫</span> Our Timeline</h2>
+          <p class="shelf-desc">Milestones of your journey together</p>
+        </div>
+        <div id="timeline-track" class="timeline-track"></div>
+        <form id="timeline-form" class="timeline-form">
+          <h3>Add a Milestone</h3>
+          <div class="form-row">
+            <input type="text" id="timeline-title" placeholder="Milestone title" required />
+            <input type="date" id="timeline-date" required />
+          </div>
+          <div class="form-row">
+            <input type="text" id="timeline-emoji" placeholder="Emoji (e.g. 💍)" maxlength="4" />
+            <select id="timeline-category">
+              <option value="love">Love</option>
+              <option value="adventure">Adventure</option>
+              <option value="achievement">Achievement</option>
+              <option value="fun">Fun</option>
+            </select>
+          </div>
+          <textarea id="timeline-desc" placeholder="Describe this moment..."></textarea>
+          <button type="submit" class="btn-submit">Add Milestone</button>
+        </form>
+      </section>
+
+      <!-- Reading Analytics -->
+      <section class="analytics-section" id="analytics-section">
+        <div class="analytics-header">
+          <h2><span class="shelf-icon">📊</span> Reading Analytics</h2>
+          <p class="shelf-desc">Track your reading journey together</p>
+        </div>
+        <div class="analytics-grid" id="analytics-grid">
+          <div class="analytics-card">
+            <span class="analytics-label">Reading Streak</span>
+            <span class="analytics-value" id="analytics-streak">0 days</span>
+          </div>
+          <div class="analytics-card">
+            <span class="analytics-label">Total Time</span>
+            <span class="analytics-value" id="analytics-time">0 min</span>
+          </div>
+          <div class="analytics-card">
+            <span class="analytics-label">Pages Read</span>
+            <span class="analytics-value" id="analytics-pages">0</span>
+          </div>
+          <div class="analytics-card">
+            <span class="analytics-label">Most Read</span>
+            <span class="analytics-value" id="analytics-most-read">—</span>
+          </div>
+        </div>
+        <div class="analytics-chart" id="analytics-chart">
+          <h4>Reading Activity (Last 7 Days)</h4>
+          <div class="chart-bars" id="chart-bars"></div>
+        </div>
+      </section>
+
+      <!-- Love Letter Templates -->
+      <section class="templates-section" id="templates-section">
+        <div class="templates-header">
+          <h2><span class="shelf-icon">💌</span> Love Letter Templates</h2>
+          <p class="shelf-desc">Quick-start templates for romantic pages</p>
+        </div>
+        <div class="templates-grid" id="templates-grid"></div>
       </section>
 
       <!-- Keyboard Shortcuts Help -->
@@ -252,8 +397,8 @@
 
   <!-- ===================== FALLBACK (no WebGL / mobile) ===================== -->
   <div id="fallback-library" class="fallback-library hidden">
-    <h1 class="fallback-title">🏮 Ethereal Library</h1>
-    <p class="fallback-sub">A Moroccan sanctuary of shared stories</p>
+    <h1 class="fallback-title">🏮 Connection</h1>
+    <p class="fallback-sub">A sanctuary for two souls, candlelit and connected</p>
     <div class="fallback-shelves">
       <div class="fallback-shelf-section">
         <h3>🕯️ Candice's Shelf</h3>
@@ -293,12 +438,31 @@
       <div class="page-nav">
         <button id="prev-page" class="btn-nav">&larr; Previous</button>
         <button id="btn-bookmark" class="btn-nav btn-bookmark" title="Bookmark this page">🔖 Bookmark</button>
+        <button id="btn-export-book" class="btn-nav btn-export" title="Export / Share this book">📤 Share</button>
         <span id="page-counter" class="page-counter"></span>
         <button id="next-page" class="btn-nav">Next &rarr;</button>
       </div>
       <div class="reading-progress">
         <div class="progress-fill" id="progress-fill"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Celebration Effects Canvas -->
+  <canvas id="celebration-canvas" class="celebration-canvas hidden"></canvas>
+
+  <!-- Export Modal -->
+  <div id="export-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content export-modal-content">
+      <button class="modal-close" id="modal-close-export">&times;</button>
+      <h2>Share This Book</h2>
+      <div class="export-options">
+        <button class="export-btn" id="btn-export-text">📄 Copy as Text</button>
+        <button class="export-btn" id="btn-export-json">💾 Download JSON</button>
+        <button class="export-btn" id="btn-export-link">🔗 Copy Share Link</button>
+      </div>
+      <div id="export-preview" class="export-preview"></div>
     </div>
   </div>
 

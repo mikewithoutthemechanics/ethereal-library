@@ -1,5 +1,5 @@
 /**
- * ETHEREAL LIBRARY — Authentication Module
+ * CONNECTION — Authentication Module
  * Supabase OAuth + Email/Password + Guest mode
  */
 

@@ -1,7 +1,9 @@
 /**
- * ETHEREAL LIBRARY — Advanced Moroccan Immersive 3D Experience
+ * CONNECTION — Advanced Moroccan Immersive 3D Experience
  * WASD free-roam, keyboard shortcuts, search/filter, favorites,
- * bookmarks, countdown timer, interactive lanterns, photo gallery wall
+ * bookmarks, countdown timer, interactive lanterns, photo gallery wall,
+ * mood themes, ambient sounds, couple's journal, reading analytics,
+ * love letter templates, celebration effects, export/share
  */
 
 const IS_MOBILE = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -115,6 +117,9 @@ function renderDashboard() {
   renderShelfBooks('Michael', document.getElementById('michael-books'));
   renderMemories();
   renderStats();
+  renderAnalytics();
+  renderJournalEntries();
+  renderTimeline();
 }
 
 function getFilteredBooks(owner) {
@@ -451,9 +456,11 @@ function showPage(book, idx) {
   updateProgress(book);
   animatePageTurn();
 
-  // Save reading progress
+  // Save reading progress + analytics
   const pct = Math.round(((idx + 1) / book.pages.length) * 100);
   setReadPct(book.title, book.owner, pct);
+  trackReadingActivity('page');
+  trackBookRead(book.title);
 }
 
 function animatePageTurn() {
@@ -1212,6 +1219,511 @@ function renderFallbackShelf(owner, container) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Mood / Theme Selector
+// ═══════════════════════════════════════════════════════════════════════════
+
+let currentMood = localStorage.getItem('connection_mood') || 'warm';
+
+function initMoodSelector() {
+  applyMood(currentMood);
+  document.querySelectorAll('.mood-btn').forEach(btn => {
+    if (btn.dataset.mood === currentMood) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMood = btn.dataset.mood;
+      localStorage.setItem('connection_mood', currentMood);
+      applyMood(currentMood);
+      showToast('Mood set to ' + btn.querySelector('.mood-name').textContent);
+    });
+  });
+}
+
+function applyMood(mood) {
+  document.body.classList.remove('mood-cool', 'mood-twilight', 'mood-dawn');
+  if (mood !== 'warm') document.body.classList.add('mood-' + mood);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Ambient Sound System
+// ═══════════════════════════════════════════════════════════════════════════
+
+let ambientSoundCtx = null;
+let ambientSoundSource = null;
+let ambientSoundGain = null;
+let currentAmbientSound = localStorage.getItem('connection_ambient') || 'silence';
+
+function initAmbientSounds() {
+  document.querySelectorAll('.ambient-btn').forEach(btn => {
+    if (btn.dataset.sound === currentAmbientSound) {
+      document.querySelectorAll('.ambient-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ambient-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentAmbientSound = btn.dataset.sound;
+      localStorage.setItem('connection_ambient', currentAmbientSound);
+      playAmbientSound(currentAmbientSound);
+      showToast('Ambient: ' + btn.querySelector('.ambient-name').textContent);
+    });
+  });
+
+  const volumeSlider = document.getElementById('ambient-volume');
+  if (volumeSlider) {
+    volumeSlider.addEventListener('input', (e) => {
+      if (ambientSoundGain) ambientSoundGain.gain.setValueAtTime(e.target.value / 100 * 0.5, ambientSoundCtx.currentTime);
+    });
+  }
+}
+
+function playAmbientSound(type) {
+  if (ambientSoundSource) { try { ambientSoundSource.stop(); } catch(e) {} }
+  if (type === 'silence') return;
+
+  if (!ambientSoundCtx) {
+    ambientSoundCtx = new (window.AudioContext || window.webkitAudioContext)();
+    ambientSoundGain = ambientSoundCtx.createGain();
+    ambientSoundGain.connect(ambientSoundCtx.destination);
+  }
+
+  const vol = (document.getElementById('ambient-volume')?.value || 40) / 100 * 0.5;
+  ambientSoundGain.gain.setValueAtTime(vol, ambientSoundCtx.currentTime);
+
+  const sampleRate = ambientSoundCtx.sampleRate;
+  const duration = 4;
+  const buffer = ambientSoundCtx.createBuffer(1, sampleRate * duration, sampleRate);
+  const data = buffer.getChannelData(0);
+
+  for (let i = 0; i < data.length; i++) {
+    const t = i / sampleRate;
+    if (type === 'rain') {
+      data[i] = (Math.random() - 0.5) * 0.15 * (0.5 + Math.sin(t * 0.3) * 0.3) + Math.sin(t * 200 + Math.random() * 6.28) * 0.02 * (Math.random() > 0.995 ? 3 : 1);
+    } else if (type === 'fireplace') {
+      data[i] = (Math.random() - 0.5) * 0.08 + Math.sin(t * 40 + Math.sin(t * 3) * 5) * 0.04 * (0.5 + Math.random() * 0.5);
+    } else if (type === 'ocean') {
+      const wave = Math.sin(t * 0.15) * 0.5 + Math.sin(t * 0.23) * 0.3;
+      data[i] = (Math.random() - 0.5) * 0.1 * (0.3 + wave * 0.7) + Math.sin(t * 80) * 0.01 * wave;
+    } else if (type === 'forest') {
+      data[i] = (Math.random() - 0.5) * 0.03 + Math.sin(t * 800 + Math.sin(t * 2) * 400) * 0.02 * (Math.sin(t * 0.5) > 0.3 ? 1 : 0);
+    }
+  }
+
+  ambientSoundSource = ambientSoundCtx.createBufferSource();
+  ambientSoundSource.buffer = buffer;
+  ambientSoundSource.loop = true;
+  ambientSoundSource.connect(ambientSoundGain);
+  ambientSoundSource.start(0);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Couple's Journal
+// ═══════════════════════════════════════════════════════════════════════════
+
+const JOURNAL_PROMPTS = [
+  "What's one small thing your partner did recently that made you smile?",
+  "Describe your ideal day together from morning to night.",
+  "What's a dream you haven't told each other about yet?",
+  "Write about the moment you realized you were in love.",
+  "If you could relive one day together, which would it be?",
+  "What does 'home' mean to you in three sentences?",
+  "Share a childhood memory that shaped who you are today.",
+  "What are three things you're grateful for about your partner?",
+  "Describe a future adventure you want to share together.",
+  "What song reminds you most of your relationship?",
+  "Write a short poem about your favorite moment together.",
+  "What's one lesson love has taught you this year?",
+  "If your love story were a book, what would the title be?",
+  "Share something you admire about your partner that you rarely say.",
+  "What tradition would you like to start together?",
+  "Describe the feeling when you're apart and then reunited.",
+  "What's the bravest thing you've done for love?",
+  "Write about a time your partner surprised you.",
+  "What does connection mean to you?",
+  "Share a wish you have for the two of you.",
+  "What's the most meaningful gift you've ever received or given?",
+  "Describe the sound of your partner's laughter.",
+  "What challenge have you overcome together that made you stronger?",
+  "Write three promises for the future.",
+  "What makes your relationship unique?"
+];
+
+let journalEntries = [];
+
+function loadJournal() {
+  try { const j = localStorage.getItem('connection_journal'); if (j) journalEntries = JSON.parse(j); } catch {}
+}
+
+function saveJournal() {
+  try { localStorage.setItem('connection_journal', JSON.stringify(journalEntries)); } catch {}
+}
+
+function initJournal() {
+  loadJournal();
+  renderJournalPrompt();
+  renderJournalEntries();
+
+  document.getElementById('btn-refresh-prompt')?.addEventListener('click', renderJournalPrompt);
+
+  const form = document.getElementById('journal-form');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = document.getElementById('journal-text').value.trim();
+      if (!text) return;
+      const by = document.getElementById('journal-by').value.trim() || 'Anonymous';
+      const promptText = document.getElementById('prompt-text')?.textContent || '';
+      journalEntries.unshift({ text, by, prompt: promptText, date: Date.now() });
+      saveJournal();
+      form.reset();
+      renderJournalEntries();
+      showToast('Journal entry saved');
+      trackReadingActivity('journal');
+    });
+  }
+}
+
+function renderJournalPrompt() {
+  const el = document.getElementById('prompt-text');
+  if (!el) return;
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const idx = (dayOfYear + Math.floor(Math.random() * 5)) % JOURNAL_PROMPTS.length;
+  el.textContent = JOURNAL_PROMPTS[idx];
+}
+
+function renderJournalEntries() {
+  const container = document.getElementById('journal-entries');
+  if (!container) return;
+  container.innerHTML = '';
+  if (journalEntries.length === 0) {
+    container.innerHTML = '<p style="color:var(--ink-faded);font-size:0.85rem;text-align:center;padding:1rem;">No entries yet. Respond to the prompt above!</p>';
+    return;
+  }
+  journalEntries.slice(0, 20).forEach((entry, idx) => {
+    const el = document.createElement('div');
+    el.className = 'journal-entry';
+    const dateStr = new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    el.innerHTML =
+      '<div class="journal-entry-date">' + dateStr + (entry.prompt ? ' &middot; "' + escapeHtml(entry.prompt.substring(0, 50)) + '..."' : '') + '</div>' +
+      '<div class="journal-entry-text">' + escapeHtml(entry.text) + '</div>' +
+      '<div class="journal-entry-by">\u2014 ' + escapeHtml(entry.by) + '</div>';
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Relationship Timeline
+// ═══════════════════════════════════════════════════════════════════════════
+
+let timelineMilestones = [];
+
+function loadTimeline() {
+  try { const t = localStorage.getItem('connection_timeline'); if (t) timelineMilestones = JSON.parse(t); } catch {}
+}
+
+function saveTimeline() {
+  try { localStorage.setItem('connection_timeline', JSON.stringify(timelineMilestones)); } catch {}
+}
+
+function initTimeline() {
+  loadTimeline();
+  renderTimeline();
+
+  const form = document.getElementById('timeline-form');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = document.getElementById('timeline-title').value.trim();
+      const date = document.getElementById('timeline-date').value;
+      if (!title || !date) return;
+      const emoji = document.getElementById('timeline-emoji').value.trim() || '';
+      const category = document.getElementById('timeline-category').value;
+      const desc = document.getElementById('timeline-desc').value.trim();
+      timelineMilestones.push({ title, date: new Date(date).getTime(), emoji, category, desc });
+      timelineMilestones.sort((a, b) => b.date - a.date);
+      saveTimeline();
+      form.reset();
+      renderTimeline();
+      showToast('Milestone added');
+      triggerCelebration();
+    });
+  }
+}
+
+function renderTimeline() {
+  const container = document.getElementById('timeline-track');
+  if (!container) return;
+  container.innerHTML = '';
+  if (timelineMilestones.length === 0) {
+    container.innerHTML = '<p style="color:var(--ink-faded);font-size:0.85rem;text-align:center;padding:1rem;">No milestones yet. Add your first one!</p>';
+    return;
+  }
+  timelineMilestones.forEach((ms, idx) => {
+    const el = document.createElement('div');
+    el.className = 'timeline-item';
+    const dateStr = new Date(ms.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    el.innerHTML =
+      '<div class="timeline-dot ' + (ms.category || 'love') + '"></div>' +
+      '<div class="timeline-date">' + dateStr + '</div>' +
+      '<div class="timeline-title">' + (ms.emoji ? '<span class="timeline-emoji">' + ms.emoji + '</span>' : '') + escapeHtml(ms.title) + '</div>' +
+      (ms.desc ? '<div class="timeline-desc">' + escapeHtml(ms.desc) + '</div>' : '') +
+      '<button class="timeline-delete" data-idx="' + idx + '">&times;</button>';
+    container.appendChild(el);
+  });
+
+  container.querySelectorAll('.timeline-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const i = parseInt(e.target.dataset.idx);
+      timelineMilestones.splice(i, 1);
+      saveTimeline();
+      renderTimeline();
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Reading Analytics
+// ═══════════════════════════════════════════════════════════════════════════
+
+let readingAnalytics = { totalMinutes: 0, pagesRead: 0, sessions: [], streak: 0, lastReadDate: null, bookReads: {} };
+
+function loadAnalytics() {
+  try { const a = localStorage.getItem('connection_analytics'); if (a) readingAnalytics = JSON.parse(a); } catch {}
+}
+
+function saveAnalytics() {
+  try { localStorage.setItem('connection_analytics', JSON.stringify(readingAnalytics)); } catch {}
+}
+
+function trackReadingActivity(type) {
+  const today = new Date().toISOString().split('T')[0];
+  if (readingAnalytics.lastReadDate === today) {
+    readingAnalytics.sessions.push({ date: today, type: type || 'read' });
+  } else {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    if (readingAnalytics.lastReadDate === yesterday) readingAnalytics.streak++;
+    else readingAnalytics.streak = 1;
+    readingAnalytics.lastReadDate = today;
+    readingAnalytics.sessions.push({ date: today, type: type || 'read' });
+  }
+  if (type === 'page') readingAnalytics.pagesRead++;
+  if (type === 'minute') readingAnalytics.totalMinutes++;
+  saveAnalytics();
+}
+
+function trackBookRead(title) {
+  if (!readingAnalytics.bookReads[title]) readingAnalytics.bookReads[title] = 0;
+  readingAnalytics.bookReads[title]++;
+  saveAnalytics();
+}
+
+function renderAnalytics() {
+  loadAnalytics();
+  document.getElementById('analytics-streak').textContent = readingAnalytics.streak + ' day' + (readingAnalytics.streak !== 1 ? 's' : '');
+  document.getElementById('analytics-time').textContent = readingAnalytics.totalMinutes + ' min';
+  document.getElementById('analytics-pages').textContent = readingAnalytics.pagesRead;
+
+  const mostRead = Object.entries(readingAnalytics.bookReads).sort((a, b) => b[1] - a[1])[0];
+  document.getElementById('analytics-most-read').textContent = mostRead ? mostRead[0].substring(0, 15) : '\u2014';
+
+  renderActivityChart();
+}
+
+function renderActivityChart() {
+  const container = document.getElementById('chart-bars');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000);
+    const key = d.toISOString().split('T')[0];
+    const count = readingAnalytics.sessions.filter(s => s.date === key).length;
+    days.push({ label: d.toLocaleDateString('en-US', { weekday: 'short' }).substring(0, 2), count });
+  }
+
+  const maxCount = Math.max(1, ...days.map(d => d.count));
+  days.forEach(day => {
+    const bar = document.createElement('div');
+    bar.className = 'chart-bar';
+    const h = Math.max(2, (day.count / maxCount) * 80);
+    bar.innerHTML = '<div class="chart-bar-value">' + day.count + '</div><div class="chart-bar-fill" style="height:' + h + 'px"></div><div class="chart-bar-label">' + day.label + '</div>';
+    container.appendChild(bar);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Love Letter Templates
+// ═══════════════════════════════════════════════════════════════════════════
+
+const LETTER_TEMPLATES = [
+  { emoji: '💌', title: 'Classic Love Letter', text: 'My dearest [name],\n\nEvery moment with you is a treasure I hold close to my heart. From the way you [specific detail] to the sound of your laughter, you fill my world with joy.\n\nI cherish every memory we\'ve created together, and I look forward to every moment still to come.\n\nForever and always,\n[your name]' },
+  { emoji: '🌹', title: 'Anniversary', text: '[name],\n\nAnother year, another chapter in our beautiful story. When I look back at everything we\'ve shared, I\'m overwhelmed with gratitude.\n\nThank you for choosing me, every single day. Thank you for your patience, your kindness, and your unwavering love.\n\nHere\'s to us — to every sunset we\'ve watched and every sunrise still ahead.\n\nWith all my love,\n[your name]' },
+  { emoji: '🌙', title: 'Goodnight Note', text: 'Hey [name],\n\nAs the stars come out tonight, I just want you to know — you\'re the last thing on my mind before I close my eyes and the first thought when I wake.\n\nSweet dreams, my love. Tomorrow is another day I get to love you.\n\n— [your name]' },
+  { emoji: '☀️', title: 'Morning Greeting', text: 'Good morning, beautiful soul.\n\nI woke up thinking about [specific memory] and it made me smile. You have this incredible way of making even ordinary moments feel extraordinary.\n\nI hope today brings you as much joy as you bring to my life.\n\nLove always,\n[your name]' },
+  { emoji: '✈️', title: 'Missing You', text: 'My dearest [name],\n\nThe distance between us right now feels like an ocean, but every wave carries my thoughts of you.\n\nI miss your warmth, your voice, the way you [specific detail]. Soon we\'ll be together again, and every second apart will have been worth the wait.\n\nCounting the moments,\n[your name]' },
+  { emoji: '🎉', title: 'Celebration', text: '[name]!\n\nToday is YOUR day and I want you to know how incredibly proud I am of you. You inspire me with your [quality] and your [quality].\n\nHere\'s to celebrating you — not just today, but every day. You deserve the world.\n\nWith pride and love,\n[your name]' },
+  { emoji: '🙏', title: 'Gratitude', text: 'Dear [name],\n\nI don\'t say it enough, so let me say it now — thank you.\n\nThank you for being my rock when I needed strength.\nThank you for laughing with me when I needed joy.\nThank you for seeing me — really seeing me — when I felt invisible.\n\nYou are my greatest gift.\n\nGratefully yours,\n[your name]' },
+  { emoji: '🌟', title: 'Just Because', text: 'Hey you,\n\nNo special occasion. No holiday. No reason at all — except that I love you and I wanted you to know.\n\nYou make my life better in ways I can\'t even articulate. Just... thank you for being you.\n\n— [your name]' }
+];
+
+function initTemplates() {
+  const container = document.getElementById('templates-grid');
+  if (!container) return;
+  LETTER_TEMPLATES.forEach((tmpl, idx) => {
+    const card = document.createElement('div');
+    card.className = 'template-card';
+    card.innerHTML =
+      '<span class="template-emoji">' + tmpl.emoji + '</span>' +
+      '<div class="template-title">' + tmpl.title + '</div>' +
+      '<div class="template-preview">' + escapeHtml(tmpl.text.substring(0, 100)) + '...</div>';
+    card.addEventListener('click', () => useTemplate(idx));
+    container.appendChild(card);
+  });
+}
+
+function useTemplate(idx) {
+  const tmpl = LETTER_TEMPLATES[idx];
+  if (!tmpl) return;
+  const modal = document.getElementById('add-book-modal');
+  if (modal) modal.classList.remove('hidden');
+  const titleInput = document.getElementById('book-new-title');
+  if (titleInput) titleInput.value = tmpl.title;
+  const textArea = document.querySelector('#pages-editor .page-text');
+  if (textArea) textArea.value = tmpl.text;
+  showToast('Template loaded — customize and create!');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Export / Share Book
+// ═══════════════════════════════════════════════════════════════════════════
+
+function initExport() {
+  document.getElementById('btn-export-book')?.addEventListener('click', openExportModal);
+  document.getElementById('modal-close-export')?.addEventListener('click', () => document.getElementById('export-modal').classList.add('hidden'));
+  document.getElementById('export-modal')?.querySelector('.modal-backdrop')?.addEventListener('click', () => document.getElementById('export-modal').classList.add('hidden'));
+  document.getElementById('btn-export-text')?.addEventListener('click', exportAsText);
+  document.getElementById('btn-export-json')?.addEventListener('click', exportAsJSON);
+  document.getElementById('btn-export-link')?.addEventListener('click', exportAsLink);
+}
+
+function openExportModal() {
+  const book = getCurrentBook();
+  if (!book) { showToast('No book open'); return; }
+  document.getElementById('export-modal').classList.remove('hidden');
+  const preview = document.getElementById('export-preview');
+  preview.textContent = 'Book: ' + book.title + '\nBy: ' + (book.owner || 'Unknown') + '\nPages: ' + (book.pages ? book.pages.length : 0) + '\nTags: ' + (book.tags ? book.tags.join(', ') : 'none');
+  preview.classList.add('visible');
+}
+
+function exportAsText() {
+  const book = getCurrentBook();
+  if (!book) return;
+  let text = '=== ' + book.title + ' ===\nBy: ' + (book.owner || 'Unknown') + '\n\n';
+  (book.pages || []).forEach((page, i) => {
+    text += '--- Page ' + (i + 1) + ' ---\n';
+    if (page.type === 'letter' || page.type === 'note') text += (page.from ? 'From: ' + page.from + '\n' : '') + page.text + '\n\n';
+    else if (page.type === 'photo') text += '[Photo: ' + (page.caption || 'Untitled') + ']\n\n';
+  });
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!')).catch(() => showToast('Copy failed'));
+}
+
+function exportAsJSON() {
+  const book = getCurrentBook();
+  if (!book) return;
+  const data = JSON.stringify(book, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = (book.title || 'book').replace(/[^a-z0-9]/gi, '_') + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('Download started');
+}
+
+function exportAsLink() {
+  const book = getCurrentBook();
+  if (!book) return;
+  const encoded = btoa(encodeURIComponent(JSON.stringify({ title: book.title, owner: book.owner, pages: (book.pages || []).map(p => ({ type: p.type, text: p.text, caption: p.caption, from: p.from })) })));
+  const link = window.location.origin + '?share=' + encoded.substring(0, 200);
+  navigator.clipboard.writeText(link).then(() => showToast('Share link copied!')).catch(() => showToast('Copy failed'));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Celebration Effects
+// ═══════════════════════════════════════════════════════════════════════════
+
+function triggerCelebration() {
+  const canvas = document.getElementById('celebration-canvas');
+  if (!canvas) return;
+  canvas.classList.remove('hidden');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+
+  const particles = [];
+  const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff8fab', '#c084fc', '#fbbf24', '#34d399'];
+
+  for (let i = 0; i < 120; i++) {
+    particles.push({
+      x: window.innerWidth / 2 + (Math.random() - 0.5) * 100,
+      y: window.innerHeight / 2,
+      vx: (Math.random() - 0.5) * 12,
+      vy: -Math.random() * 15 - 5,
+      size: Math.random() * 8 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 10,
+      life: 1,
+      shape: Math.random() > 0.5 ? 'circle' : 'rect'
+    });
+  }
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    particles.forEach(p => {
+      if (p.life <= 0) return;
+      alive = true;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.3;
+      p.vx *= 0.99;
+      p.rotation += p.rotSpeed;
+      p.life -= 0.012;
+
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+      }
+      ctx.restore();
+    });
+
+    frame++;
+    if (alive && frame < 300) requestAnimationFrame(draw);
+    else { ctx.clearRect(0, 0, canvas.width, canvas.height); canvas.classList.add('hidden'); }
+  }
+  draw();
+}
+
+function checkSpecialDates() {
+  if (!CONFIG || !CONFIG.countdownDate) return;
+  const target = new Date(CONFIG.countdownDate);
+  const now = new Date();
+  if (target.getDate() === now.getDate() && target.getMonth() === now.getMonth() && target.getFullYear() === now.getFullYear()) {
+    setTimeout(triggerCelebration, 2000);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Screen Navigation
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1282,6 +1794,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 1800);
 
   initAuthUI(); initBookOverlay(); initAddBookModal(); initMemoryForm(); initSearch(); initKeyboardShortcuts();
+  initMoodSelector(); initAmbientSounds(); initJournal(); initTimeline(); loadAnalytics(); initTemplates(); initExport();
+  checkSpecialDates();
 
   document.getElementById('btn-enter-library')?.addEventListener('click', enterLibrary);
   document.getElementById('btn-back-dashboard')?.addEventListener('click', backToDashboard);
