@@ -23,19 +23,19 @@
         <div class="loading-book"></div>
       </div>
       <h1>Ethereal Library</h1>
-      <p class="loading-tagline">A candlelit world of stories</p>
+      <p class="loading-tagline">A Moroccan sanctuary of shared stories</p>
       <div class="loading-bar"><div class="loading-bar-fill"></div></div>
     </div>
   </div>
 
-  <!-- ===================== LOGIN SCREEN (OAuth) ===================== -->
+  <!-- ===================== LOGIN SCREEN ===================== -->
   <div id="login-screen" class="hidden">
     <div class="login-overlay"></div>
     <div class="login-card">
       <div class="login-header">
-        <div class="login-icon">📚</div>
+        <div class="login-icon">🏮</div>
         <h1>Ethereal Library</h1>
-        <p>Sign in to access your personal bookshelf</p>
+        <p>Sign in to your shared sanctuary</p>
       </div>
       <div class="login-form">
         <button id="btn-login-google" class="btn-oauth btn-google">
@@ -61,7 +61,7 @@
   <div id="dashboard" class="hidden">
     <header class="dash-header">
       <div class="dash-brand">
-        <span class="dash-logo">📚</span>
+        <span class="dash-logo">🏮</span>
         <h1>Ethereal Library</h1>
       </div>
       <nav class="dash-nav">
@@ -100,6 +100,36 @@
           <div class="shelf-wood"></div>
           <div class="shelf-shadow"></div>
         </div>
+      </section>
+
+      <!-- Shared Memories -->
+      <section class="memories-section" id="memories-section">
+        <div class="memories-header">
+          <h2><span class="shelf-icon">✨</span> Shared Memories & Wishes</h2>
+          <p class="shelf-desc">A timeline of your moments together</p>
+        </div>
+        <div id="memories-list" class="memories-list"></div>
+        <form id="memory-form" class="memory-form">
+          <h3>Add a Memory</h3>
+          <div class="form-row">
+            <select id="memory-type">
+              <option value="memory">Memory</option>
+              <option value="wish">Wish / Bucket List</option>
+              <option value="milestone">Milestone</option>
+            </select>
+            <input type="text" id="memory-by-input" placeholder="Your name" />
+          </div>
+          <textarea id="memory-text" placeholder="Write your memory, wish, or milestone..." required></textarea>
+          <div class="form-row">
+            <input type="text" id="memory-location" placeholder="Location (optional)" />
+            <input type="date" id="memory-date-input" />
+          </div>
+          <div class="form-row">
+            <input type="file" id="memory-photo" accept="image/*" />
+            <div id="memory-photo-preview" class="hidden"></div>
+          </div>
+          <button type="submit" class="btn-submit">Add Memory</button>
+        </form>
       </section>
     </main>
   </div>
@@ -173,6 +203,11 @@
   <div id="scene-controls" class="hidden">
     <button id="btn-back-dashboard" class="scene-btn">← Dashboard</button>
     <button id="btn-toggle-audio" class="scene-btn">🎵 Sound</button>
+    <div class="shelf-zoom-controls">
+      <button id="btn-zoom-left" class="scene-btn zoom-btn">🕯️ Candice's Shelf</button>
+      <button id="btn-zoom-out" class="scene-btn zoom-btn">🏠 Overview</button>
+      <button id="btn-zoom-right" class="scene-btn zoom-btn">📖 Michael's Shelf</button>
+    </div>
     <div class="shelf-labels">
       <div class="shelf-label left-label">Candice's Shelf</div>
       <div class="shelf-label right-label">Michael's Shelf</div>
@@ -181,8 +216,8 @@
 
   <!-- ===================== FALLBACK (no WebGL / mobile) ===================== -->
   <div id="fallback-library" class="fallback-library hidden">
-    <h1 class="fallback-title">📚 Ethereal Library</h1>
-    <p class="fallback-sub">A candlelit collection of our love</p>
+    <h1 class="fallback-title">🏮 Ethereal Library</h1>
+    <p class="fallback-sub">A Moroccan sanctuary of shared stories</p>
     <div class="fallback-shelves">
       <div class="fallback-shelf-section">
         <h3>🕯️ Candice's Shelf</h3>

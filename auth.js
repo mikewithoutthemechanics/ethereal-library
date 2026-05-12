@@ -154,6 +154,7 @@ function showLoginError(msg) {
 function onLoginSuccess() {
   showScreen('dashboard');
   updateDashboardUser();
+  if (typeof renderDashboard === 'function') renderDashboard();
 }
 
 function updateDashboardUser() {
