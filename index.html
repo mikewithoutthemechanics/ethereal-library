@@ -74,6 +74,18 @@
       </nav>
     </header>
     <main class="dash-content">
+
+      <!-- Countdown + Stats -->
+      <section class="dash-top-bar">
+        <div id="countdown-display" class="countdown-display"></div>
+        <div id="library-stats" class="library-stats"></div>
+      </section>
+
+      <!-- Search & Filter -->
+      <section class="search-bar">
+        <input type="text" id="search-input" placeholder="Search books by title or tag..." class="search-input" />
+      </section>
+
       <!-- Candice's Shelf -->
       <section class="shelf-section" id="candice-shelf-section">
         <div class="shelf-header">
@@ -131,6 +143,20 @@
           <button type="submit" class="btn-submit">Add Memory</button>
         </form>
       </section>
+
+      <!-- Keyboard Shortcuts Help -->
+      <section class="shortcuts-section">
+        <h3>Keyboard Shortcuts</h3>
+        <div class="shortcuts-grid">
+          <div class="shortcut"><kbd>F</kbd> Free roam mode</div>
+          <div class="shortcut"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Walk around</div>
+          <div class="shortcut"><kbd>1</kbd> Candice's shelf</div>
+          <div class="shortcut"><kbd>2</kbd> Michael's shelf</div>
+          <div class="shortcut"><kbd>ESC</kbd> Go back / close</div>
+          <div class="shortcut"><kbd>B</kbd> Bookmark page</div>
+          <div class="shortcut"><kbd>←</kbd><kbd>→</kbd> Turn pages</div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -152,9 +178,15 @@
             <option value="Michael">Michael's Shelf</option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="book-spine-color">Spine Color</label>
-          <input type="color" id="book-spine-color" value="#8B4513" />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="book-spine-color">Spine Color</label>
+            <input type="color" id="book-spine-color" value="#8B4513" />
+          </div>
+          <div class="form-group">
+            <label for="book-tags">Tags (comma-separated)</label>
+            <input type="text" id="book-tags" placeholder="e.g., travel, love, poems" />
+          </div>
         </div>
         <div class="form-group">
           <label>Pages</label>
@@ -199,10 +231,14 @@
   <!-- Moonlight beam (parallax) -->
   <div class="moonlight hidden" id="moonlight"></div>
 
+  <!-- Mode indicator -->
+  <div id="mode-indicator" class="mode-indicator hidden"></div>
+
   <!-- 3D UI Controls -->
   <div id="scene-controls" class="hidden">
     <button id="btn-back-dashboard" class="scene-btn">← Dashboard</button>
     <button id="btn-toggle-audio" class="scene-btn">🎵 Sound</button>
+    <button id="btn-free-roam" class="scene-btn free-roam-btn">🚶 Free Roam</button>
     <div class="shelf-zoom-controls">
       <button id="btn-zoom-left" class="scene-btn zoom-btn">🕯️ Candice's Shelf</button>
       <button id="btn-zoom-out" class="scene-btn zoom-btn">🏠 Overview</button>
@@ -256,6 +292,7 @@
       </div>
       <div class="page-nav">
         <button id="prev-page" class="btn-nav">&larr; Previous</button>
+        <button id="btn-bookmark" class="btn-nav btn-bookmark" title="Bookmark this page">🔖 Bookmark</button>
         <span id="page-counter" class="page-counter"></span>
         <button id="next-page" class="btn-nav">Next &rarr;</button>
       </div>
